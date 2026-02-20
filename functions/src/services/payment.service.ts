@@ -4,11 +4,14 @@ const db = admin.firestore();
 
 /**
  * Processes successful Razorpay payment webhook.
- * This function is idempotent and financially atomic.
+ * This function is:
+ * - Idempotent
+ * - Financially atomic
+ * - Compatible with 24-hour settlement delay
  */
 export const processSuccessfulPayment = async (payload: any) => {
 
-  // Defensive validation
+  //  Defensive payload validation
   if (!payload?.payload?.payment?.entity) {
     throw new Error("Invalid webhook payload structure");
   }
@@ -23,7 +26,7 @@ export const processSuccessfulPayment = async (payload: any) => {
     throw new Error("Missing Razorpay identifiers");
   }
 
-  // Locate payment record
+  //  Locate payment record
   const paymentQuery = await db
     .collection("payments")
     .where("razorpayOrderId", "==", razorpayOrderId)
@@ -70,16 +73,20 @@ export const processSuccessfulPayment = async (payload: any) => {
       throw new Error("Request data missing");
     }
 
-    //  Lifecycle validation
+    // Lifecycle validation
     if (requestData.status !== "COMPLETED") {
-      throw new Error("Invalid state for payment verification");
+      throw new Error("Request not completed. Cannot verify payment.");
     }
 
     if (requestData.paymentStatus === "PAID") {
-      return; // double safety
+      return; // Double safety
     }
 
-    //  Amount validation (integer math)
+    if (typeof requestData.finalPrice !== "number") {
+      throw new Error("Invalid final price");
+    }
+
+    // Amount validation (integer math)
     const expectedAmountInPaise = Math.round(requestData.finalPrice * 100);
 
     if (expectedAmountInPaise !== amountPaidInPaise) {
@@ -93,42 +100,45 @@ export const processSuccessfulPayment = async (payload: any) => {
     const commission = commissionInPaise / 100;
     const mechanicEarning = mechanicEarningInPaise / 100;
 
-    //  Update payment record
+    // Update payment record
     transaction.update(paymentRef, {
       status: "VERIFIED",
+      settlementStatus: "PENDING",
       razorpayPaymentId: razorpayPaymentId,
       verifiedAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    //  Update service request
+    // Update service request (DO NOT modify lifecycle state here)
     transaction.update(requestRef, {
-      status: "COMPLETED",
       paymentStatus: "PAID",
       commissionAmount: commission,
       mechanicEarning: mechanicEarning,
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    //  Update wallet
+    // Wallet update (Settlement model)
     const walletDoc = await transaction.get(walletRef);
 
     if (!walletDoc.exists) {
       transaction.set(walletRef, {
         totalEarned: mechanicEarning,
         totalWithdrawn: 0,
-        pendingBalance: mechanicEarning,
+        pendingSettlement: mechanicEarning,
+        availableBalance: 0,
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       });
     } else {
       const walletData = walletDoc.data();
+
       transaction.update(walletRef, {
         totalEarned: (walletData?.totalEarned || 0) + mechanicEarning,
-        pendingBalance: (walletData?.pendingBalance || 0) + mechanicEarning,
+        pendingSettlement:
+          (walletData?.pendingSettlement || 0) + mechanicEarning,
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       });
     }
 
-    // Release mechanic
+    // Release mechanic after verified payment
     transaction.update(mechanicRef, {
       activeRequestId: null
     });

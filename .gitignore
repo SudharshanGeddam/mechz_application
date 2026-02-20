@@ -92,3 +92,4 @@ firebase.json
 
 # dataconnect generated files
 .dataconnect
+.vscode
