@@ -5,11 +5,11 @@ class AuthRepository {
   late final FirebaseAuth _auth;
   late final FirebaseFirestore _firestore;
 
-  AuthRepository ({
-    FirebaseAuth? auth,
-    FirebaseFirestore? firestore,
-  }) : _auth = auth ?? FirebaseAuth.instance,
-  _firestore = firestore ?? FirebaseFirestore.instance;
+  AuthRepository({FirebaseAuth? auth, FirebaseFirestore? firestore})
+    : _auth = auth ?? FirebaseAuth.instance,
+      _firestore = firestore ?? FirebaseFirestore.instance;
+
+  User? get currentUser => _auth.currentUser;
 
   Future<void> verifyPhone({
     required String phoneNumber,
@@ -20,11 +20,14 @@ class AuthRepository {
       phoneNumber: phoneNumber,
       verificationCompleted: (PhoneAuthCredential credential) async {
         await _auth.signInWithCredential(credential);
-      }, verificationFailed: (FirebaseAuthException e) {
+      },
+      verificationFailed: (FirebaseAuthException e) {
         onError(e.message ?? "Verification failed");
-      }, codeSent: (String verificationId, int? resendToken) {
+      },
+      codeSent: (String verificationId, int? resendToken) {
         codeSent(verificationId);
-      }, codeAutoRetrievalTimeout: (String verificationId) {},
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {},
     );
   }
 
@@ -78,7 +81,8 @@ class AuthRepository {
       "createdAt": FieldValue.serverTimestamp(),
     });
   }
-   Future<void> signOut() async {
-      await _auth.signOut();
+
+  Future<void> signOut() async {
+    await _auth.signOut();
   }
 }
