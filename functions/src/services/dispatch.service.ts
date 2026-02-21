@@ -1,4 +1,5 @@
 import * as admin from "firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 import { geohashQueryBounds, distanceBetween } from "geofire-common";
 
 const db = admin.firestore();
@@ -74,7 +75,7 @@ export const dispatchServiceRequestHandler = async (
   // Update Request with Candidates
   await requestRef.update({
     candidateMechanics: selectedMechanics,
-    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    updatedAt: FieldValue.serverTimestamp()
   });
 
 };

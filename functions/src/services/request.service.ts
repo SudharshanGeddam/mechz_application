@@ -1,4 +1,5 @@
 import * as admin from "firebase-admin";
+import { GeoPoint, FieldValue } from "firebase-admin/firestore";
 import { CreateServiceRequestInput } from "../types/request.types";
 import { geohashForLocation } from "geofire-common";
 
@@ -15,7 +16,11 @@ export const createServiceRequestHandler = async (
   }
 
   // Validate Required Fields
-  if (!data.serviceType || !data.latitude || !data.longitude) {
+  if (
+    !data.serviceType ||
+    data.latitude === undefined ||
+    data.longitude === undefined
+  ) {
     throw new Error("Missing required fields");
   }
 
@@ -89,7 +94,7 @@ export const createServiceRequestHandler = async (
     candidateMechanics: [],
     serviceName: serviceData.name,
     finalPrice: finalPrice,
-    location: new admin.firestore.GeoPoint(
+    location: new GeoPoint(
       data.latitude,
       data.longitude
     ),
@@ -97,8 +102,8 @@ export const createServiceRequestHandler = async (
     status: "SEARCHING",
     paymentStatus: "PENDING",
     dispatchType: data.dispatchType,
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp()
   });
 
   return {
