@@ -1,4 +1,4 @@
-package com.example.mechanic_app
+package com.mechzapp.mechanic
 
 import io.flutter.embedding.android.FlutterActivity
 
