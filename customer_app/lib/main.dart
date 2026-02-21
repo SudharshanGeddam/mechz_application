@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:customer_app/features/auth/cubit/auth_cubit.dart';
-import 'package:customer_app/features/auth/cubit/auth_state.dart';
-import 'package:customer_app/features/auth/repository/auth_repository.dart';
+import 'package:customer_app/features/cubit/auth_cubit.dart';
+import 'package:customer_app/features/cubit/auth_state.dart';
+import 'package:customer_app/features/cubit/service_cubit.dart';
+import 'package:customer_app/features/repository/auth_repository.dart';
+import 'package:customer_app/features/repository/service_repository.dart';
 import 'package:customer_app/firebase_options.dart';
 import 'package:customer_app/screens/home_screen.dart';
 import 'package:customer_app/screens/login_screen.dart';
@@ -21,13 +23,6 @@ void main() async {
   FirebaseFunctions.instance.useFunctionsEmulator('10.0.2.2', 5001);
 
   runApp(const MyApp());
-
-  try {
-    await FirebaseAuth.instance.signInAnonymously();
-    print("Auth emulator connected");
-  } catch (e) {
-    print("Auth error: $e");
-  }
 }
 
 class MyApp extends StatelessWidget {
@@ -35,11 +30,28 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => AuthCubit(AuthRepository())..checkAuthStatus(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: const RootRouter(),
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<AuthRepository>(create: (_) => AuthRepository()),
+        RepositoryProvider<ServiceRepository>(
+          create: (_) => ServiceRepository(),
+        ),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>(
+            create: (context) =>
+                AuthCubit(context.read<AuthRepository>())..checkAuthStatus(),
+          ),
+          BlocProvider<ServiceCubit>(
+            create: (context) =>
+                ServiceCubit(context.read<ServiceRepository>())..loadServices(),
+          ),
+        ],
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: const RootRouter(),
+        ),
       ),
     );
   }

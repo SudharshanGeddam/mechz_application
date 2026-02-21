@@ -1,5 +1,5 @@
-import 'package:customer_app/features/auth/cubit/auth_state.dart';
-import 'package:customer_app/features/auth/repository/auth_repository.dart';
+import 'package:customer_app/features/cubit/auth_state.dart';
+import 'package:customer_app/features/repository/auth_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AuthCubit extends Cubit<AuthState> {

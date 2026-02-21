@@ -1,7 +1,6 @@
 import 'dart:async';
-
-import 'package:customer_app/features/auth/cubit/auth_cubit.dart';
-import 'package:customer_app/features/auth/cubit/auth_state.dart';
+import 'package:customer_app/features/cubit/auth_cubit.dart';
+import 'package:customer_app/features/cubit/auth_state.dart';
 import 'package:customer_app/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
