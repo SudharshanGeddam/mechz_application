@@ -4,6 +4,7 @@ import 'package:customer_app/features/cubit/booking_state.dart';
 import 'package:customer_app/features/cubit/service_cubit.dart';
 import 'package:customer_app/features/cubit/service_state.dart';
 import 'package:customer_app/features/repository/service_repository.dart';
+import 'package:customer_app/screens/request_status_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -43,16 +44,19 @@ class HomeScreen extends StatelessWidget {
             }
 
             if (state is BookingSuccess) {
-              Navigator.pop(context); // close loading
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Service request created successfully"),
+              Navigator.pop(context);
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      RequestStatusScreen(requestId: state.bookingRequestId),
                 ),
               );
             }
 
             if (state is BookingError) {
-              Navigator.pop(context); // close loading
+              Navigator.pop(context);
               ScaffoldMessenger.of(
                 context,
               ).showSnackBar(SnackBar(content: Text(state.message)));
