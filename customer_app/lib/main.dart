@@ -17,6 +17,13 @@ void main() async{
   FirebaseFunctions.instance.useFunctionsEmulator('10.0.2.2', 5001);
   
   runApp(const MyApp());
+
+  try {
+    await FirebaseAuth.instance.signInAnonymously();
+    print("Auth emulator connected");
+  } catch (e) {
+    print("Auth error: $e");
+  }
 }
 
 class MyApp extends StatelessWidget {
