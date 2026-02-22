@@ -25,10 +25,13 @@ class RequestStatusCubit extends Cubit<RequestStatusState> {
             }
 
             final data = snapshot.data();
+            final geo = data?["location"] as GeoPoint;
             emit(
               RequestStatusUpdated(
                 status: data?["status"] ?? "UNKNOWN",
                 mechanicId: data?["mechanicId"],
+                customerLat: geo.latitude,
+                customerLng: geo.longitude,
               ),
             );
           },
