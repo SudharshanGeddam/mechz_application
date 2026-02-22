@@ -9,6 +9,7 @@ class MapTrackingView extends StatefulWidget {
   final double customerLng;
   final double mechanicLat;
   final double mechanicLng;
+  final String status;
 
   const MapTrackingView({
     super.key,
@@ -16,6 +17,7 @@ class MapTrackingView extends StatefulWidget {
     required this.customerLng,
     required this.mechanicLat,
     required this.mechanicLng,
+    required this.status,
   });
 
   @override
@@ -105,27 +107,126 @@ class _MapTrackingViewState extends State<MapTrackingView> {
   }
 
   Widget _buildBottomPanel() {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Container(
-        padding: const EdgeInsets.all(20),
+  return DraggableScrollableSheet(
+    initialChildSize: 0.18,
+    minChildSize: 0.12,
+    maxChildSize: 0.45,
+    builder: (context, scrollController) {
+      return Container(
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: const [
-            Text(
-              "Mechanic is on the way",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(28),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 12,
             ),
-            SizedBox(height: 8),
-            Text("ETA: Calculating..."),
           ],
         ),
-      ),
-    );
-  }
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+
+                // Drag Handle
+                Container(
+                  width: 40,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                Row(
+                  children: [
+
+                    const CircleAvatar(
+                      radius: 28,
+                      backgroundColor: Colors.green,
+                      child: Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                    ),
+
+                    const SizedBox(width: 16),
+
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            "Mechanic Name",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text("4.8 ★ | 120 Jobs"),
+                        ],
+                      ),
+                    ),
+
+                    IconButton(
+                      onPressed: () {},
+                      icon: const Icon(Icons.call),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                const Divider(),
+
+                const SizedBox(height: 10),
+
+                Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Status"),
+                    Text(
+                      widget.status,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 8),
+
+                const Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Estimated Arrival"),
+                    Text(
+                      "5 mins",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
 }

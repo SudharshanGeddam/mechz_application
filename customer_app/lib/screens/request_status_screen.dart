@@ -30,6 +30,7 @@ class RequestStatusScreen extends StatelessWidget {
                   customerLng: state.customerLng,
                   mechanicLat: state.customerLat + 0.002,
                   mechanicLng: state.customerLng + 0.002,
+                  status: state.status,
                 );
               }
               return Center(
